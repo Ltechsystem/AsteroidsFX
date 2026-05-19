@@ -11,6 +11,7 @@ import dk.sdu.mmmi.cbse.common.data.World;
 import dk.sdu.mmmi.cbse.common.services.IEntityProcessingService;
 import dk.sdu.mmmi.cbse.common.services.IGamePluginService;
 import dk.sdu.mmmi.cbse.common.services.IPostEntityProcessingService;
+import dk.sdu.mmmi.cbse.common.health.IDamageable;
 import dk.sdu.mmmi.cbse.common.services.IWaveSpawnerService;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
@@ -43,6 +45,8 @@ class Game {
     private Text waveText;
     private Text asteroidsText;
     private Text enemiesText;
+    private Text healthText;
+    private Rectangle healthBarFill;
 
     Game(List<IGamePluginService> gamePluginServices, List<IEntityProcessingService> entityProcessingServiceList, List<IPostEntityProcessingService> postEntityProcessingServices, List<IWaveSpawnerService> waveSpawnerServices) {
         this.gamePluginServices = gamePluginServices;
@@ -60,6 +64,18 @@ class Game {
         waveText.setX(gameData.getDisplayWidth() / 2.0 - 30);
         waveText.setY(20);
         waveText.setFill(Color.WHITE);
+        int barWidth = 150;
+        int barHeight = 15;
+        int barX = gameData.getDisplayWidth() - barWidth - 10;
+        int barY = 18;
+        healthText = new Text(barX - 30, barY + 12, "HP:");
+        healthText.setFill(Color.WHITE);
+        Rectangle healthBarBg = new Rectangle(barX, barY, barWidth, barHeight);
+        healthBarBg.setFill(Color.TRANSPARENT);
+        healthBarBg.setStroke(Color.WHITE);
+        healthBarBg.setStrokeWidth(1);
+        healthBarFill = new Rectangle(barX, barY, barWidth, barHeight);
+        healthBarFill.setFill(Color.LIMEGREEN);
         Line hudLine = new Line(0, 50, gameData.getDisplayWidth(), 50);
         hudLine.setStroke(Color.WHITE);
         hudLine.setStrokeWidth(1);
@@ -67,6 +83,9 @@ class Game {
         gameWindow.getChildren().add(asteroidsText);
         gameWindow.getChildren().add(enemiesText);
         gameWindow.getChildren().add(waveText);
+        gameWindow.getChildren().add(healthText);
+        gameWindow.getChildren().add(healthBarBg);
+        gameWindow.getChildren().add(healthBarFill);
         gameWindow.getChildren().add(hudLine);
 
         Scene scene = new Scene(gameWindow);
@@ -104,6 +123,8 @@ class Game {
             iGamePlugin.start(gameData, world);
         }
         startNextWave();
+        asteroidsText.setVisible(world.getEntities().stream().anyMatch(e -> "asteroid".equals(e.getCollisionGroup())));
+        enemiesText.setVisible(world.getEntities().stream().anyMatch(e -> "enemy".equals(e.getCollisionGroup())));
         for (Entity entity : world.getEntities()) {
             Polygon polygon = new Polygon(entity.getPolygonCoordinates());
             stylePolygon(entity, polygon);
@@ -172,6 +193,16 @@ class Game {
                 .count();
         asteroidsText.setText("Asteroids left: " + asteroids);
         enemiesText.setText("Enemies left: " + enemies);
+
+        world.getEntities().stream()
+                .filter(e -> e instanceof IDamageable && "player".equals(e.getCollisionGroup()))
+                .map(e -> (IDamageable) e)
+                .findFirst()
+                .ifPresentOrElse(p -> {
+                    double pct = (double) p.getHealth() / p.getMaxHealth();
+                    healthBarFill.setWidth(150 * pct);
+                    healthBarFill.setFill(pct > 0.5 ? Color.LIMEGREEN : pct > 0.25 ? Color.ORANGE : Color.RED);
+                }, () -> healthBarFill.setWidth(0));
     }
 
     private void startNextWave() {

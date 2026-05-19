@@ -1,7 +1,7 @@
 module Core {
     requires Common;
-
-    requires CommonBullet;    
+    requires CommonBullet;
+    requires CommonHealth;    
     requires javafx.graphics;   
     requires spring.context;
     requires spring.core;
