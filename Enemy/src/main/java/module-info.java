@@ -11,4 +11,5 @@ module Enemy {
     provides IGamePluginService with dk.sdu.mmmi.cbse.enemysystem.EnemyPlugin;
     provides IEntityProcessingService with dk.sdu.mmmi.cbse.enemysystem.EnemyControlSystem;
     provides IWaveSpawnerService with dk.sdu.mmmi.cbse.enemysystem.EnemyPlugin;
+    provides dk.sdu.mmmi.cbse.common.health.IDamageSourceService with dk.sdu.mmmi.cbse.enemysystem.EnemyDamageService;
 }

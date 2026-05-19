@@ -9,4 +9,5 @@ module Player {
     uses dk.sdu.mmmi.cbse.common.bullet.BulletSPI;
     provides IGamePluginService with dk.sdu.mmmi.cbse.playersystem.PlayerPlugin;
     provides IEntityProcessingService with dk.sdu.mmmi.cbse.playersystem.PlayerControlSystem;
+    provides dk.sdu.mmmi.cbse.common.health.IDamageableService with dk.sdu.mmmi.cbse.playersystem.PlayerHealthService;
 }

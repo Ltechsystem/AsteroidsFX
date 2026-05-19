@@ -1,7 +1,8 @@
 module Core {
     requires Common;
     requires CommonBullet;
-    requires CommonHealth;    
+    requires CommonHealth;
+    uses dk.sdu.mmmi.cbse.common.health.IDamageableService;    
     requires javafx.graphics;   
     requires spring.context;
     requires spring.core;

@@ -3,11 +3,21 @@ package dk.sdu.mmmi.cbse.collisionsystem;
 import dk.sdu.mmmi.cbse.common.data.Entity;
 import dk.sdu.mmmi.cbse.common.data.GameData;
 import dk.sdu.mmmi.cbse.common.data.World;
-import dk.sdu.mmmi.cbse.common.health.IDamageable;
-import dk.sdu.mmmi.cbse.common.health.IDamageSource;
+import dk.sdu.mmmi.cbse.common.health.IDamageableService;
+import dk.sdu.mmmi.cbse.common.health.IDamageSourceService;
 import dk.sdu.mmmi.cbse.common.services.IPostEntityProcessingService;
 
+import java.util.List;
+import java.util.ServiceLoader;
+
+import static java.util.stream.Collectors.toList;
+
 public class CollisionDetector implements IPostEntityProcessingService {
+
+    private final List<IDamageableService> damageableServices =
+            ServiceLoader.load(IDamageableService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
+    private final List<IDamageSourceService> damageSourceServices =
+            ServiceLoader.load(IDamageSourceService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
 
     @Override
     public void process(GameData gameData, World world) {
@@ -24,13 +34,16 @@ public class CollisionDetector implements IPostEntityProcessingService {
 
                 if (!collides(entity1, entity2)) continue;
 
-                if (entity1 instanceof IDamageable && entity2 instanceof IDamageSource) {
-                    applyDamage((IDamageable) entity1, entity1, (IDamageSource) entity2, entity2, world);
-                } else if (entity2 instanceof IDamageable && entity1 instanceof IDamageSource) {
-                    applyDamage((IDamageable) entity2, entity2, (IDamageSource) entity1, entity1, world);
-                } else if (entity1 instanceof IDamageable) {
+                IDamageableService ds1 = findDamageable(entity1);
+                IDamageSourceService src2 = findDamageSource(entity2);
+                IDamageableService ds2 = findDamageable(entity2);
+                IDamageSourceService src1 = findDamageSource(entity1);
+
+                if (ds1 != null && src2 != null) {
+                    ds1.applyDamage(entity1, src2.getDamage(entity2), world);
                     world.removeEntity(entity2);
-                } else if (entity2 instanceof IDamageable) {
+                } else if (ds2 != null && src1 != null) {
+                    ds2.applyDamage(entity2, src1.getDamage(entity1), world);
                     world.removeEntity(entity1);
                 } else {
                     world.removeEntity(entity1);
@@ -40,13 +53,12 @@ public class CollisionDetector implements IPostEntityProcessingService {
         }
     }
 
-    private void applyDamage(IDamageable damageable, Entity damageableEntity,
-                              IDamageSource source, Entity sourceEntity, World world) {
-        damageable.setHealth(damageable.getHealth() - source.getDamage());
-        world.removeEntity(sourceEntity);
-        if (damageable.getHealth() <= 0) {
-            world.removeEntity(damageableEntity);
-        }
+    private IDamageableService findDamageable(Entity entity) {
+        return damageableServices.stream().filter(s -> s.handles(entity)).findFirst().orElse(null);
+    }
+
+    private IDamageSourceService findDamageSource(Entity entity) {
+        return damageSourceServices.stream().filter(s -> s.handles(entity)).findFirst().orElse(null);
     }
 
     private boolean collides(Entity entity1, Entity entity2) {

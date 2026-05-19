@@ -11,10 +11,11 @@ import dk.sdu.mmmi.cbse.common.data.World;
 import dk.sdu.mmmi.cbse.common.services.IEntityProcessingService;
 import dk.sdu.mmmi.cbse.common.services.IGamePluginService;
 import dk.sdu.mmmi.cbse.common.services.IPostEntityProcessingService;
-import dk.sdu.mmmi.cbse.common.health.IDamageable;
+import dk.sdu.mmmi.cbse.common.health.IDamageableService;
 import dk.sdu.mmmi.cbse.common.services.IWaveSpawnerService;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
@@ -47,6 +48,7 @@ class Game {
     private Text enemiesText;
     private Text healthText;
     private Rectangle healthBarFill;
+    private IDamageableService damageableService;
 
     Game(List<IGamePluginService> gamePluginServices, List<IEntityProcessingService> entityProcessingServiceList, List<IPostEntityProcessingService> postEntityProcessingServices, List<IWaveSpawnerService> waveSpawnerServices) {
         this.gamePluginServices = gamePluginServices;
@@ -122,6 +124,8 @@ class Game {
         for (IGamePluginService iGamePlugin : getGamePluginServices()) {
             iGamePlugin.start(gameData, world);
         }
+        damageableService = ServiceLoader.load(IDamageableService.class).stream()
+                .map(ServiceLoader.Provider::get).findFirst().orElse(null);
         startNextWave();
         asteroidsText.setVisible(world.getEntities().stream().anyMatch(e -> "asteroid".equals(e.getCollisionGroup())));
         enemiesText.setVisible(world.getEntities().stream().anyMatch(e -> "enemy".equals(e.getCollisionGroup())));
@@ -194,15 +198,18 @@ class Game {
         asteroidsText.setText("Asteroids left: " + asteroids);
         enemiesText.setText("Enemies left: " + enemies);
 
-        world.getEntities().stream()
-                .filter(e -> e instanceof IDamageable && "player".equals(e.getCollisionGroup()))
-                .map(e -> (IDamageable) e)
-                .findFirst()
-                .ifPresentOrElse(p -> {
-                    double pct = (double) p.getHealth() / p.getMaxHealth();
-                    healthBarFill.setWidth(150 * pct);
-                    healthBarFill.setFill(pct > 0.5 ? Color.LIMEGREEN : pct > 0.25 ? Color.ORANGE : Color.RED);
-                }, () -> healthBarFill.setWidth(0));
+        if (damageableService != null) {
+            world.getEntities().stream()
+                    .filter(e -> "player".equals(e.getCollisionGroup()))
+                    .findFirst()
+                    .ifPresentOrElse(player -> {
+                        double pct = (double) damageableService.getHealth(player) / damageableService.getMaxHealth(player);
+                        healthBarFill.setWidth(150 * pct);
+                        healthBarFill.setFill(pct > 0.5 ? Color.LIMEGREEN : pct > 0.25 ? Color.ORANGE : Color.RED);
+                    }, () -> healthBarFill.setWidth(0));
+        } else {
+            healthBarFill.setWidth(0);
+        }
     }
 
     private void startNextWave() {
