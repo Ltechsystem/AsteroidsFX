@@ -19,6 +19,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -85,6 +86,7 @@ class Game {
         }
         for (Entity entity : world.getEntities()) {
             Polygon polygon = new Polygon(entity.getPolygonCoordinates());
+            stylePolygon(entity, polygon);
             polygons.put(entity, polygon);
             gameWindow.getChildren().add(polygon);
         }
@@ -128,6 +130,7 @@ class Game {
             Polygon polygon = polygons.get(entity);
             if (polygon == null) {
                 polygon = new Polygon(entity.getPolygonCoordinates());
+                stylePolygon(entity, polygon);
                 polygons.put(entity, polygon);
                 gameWindow.getChildren().add(polygon);
             }
@@ -136,6 +139,13 @@ class Game {
             polygon.setRotate(entity.getRotation());
         }
 
+    }
+
+    private void stylePolygon(Entity entity, Polygon polygon) {
+        String fillColor = entity.getFillColor();
+        polygon.setFill(fillColor != null ? Color.web(fillColor) : Color.WHITE);
+        polygon.setStroke(Color.BLACK);
+        polygon.setStrokeWidth(1);
     }
 
     public List<IGamePluginService> getGamePluginServices() {

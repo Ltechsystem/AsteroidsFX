@@ -24,8 +24,8 @@ public class EnemyPlugin implements IGamePluginService {
 
     private Entity createEnemy(GameData gameData) {
         Entity e = new Enemy();
-        e.setPolygonCoordinates(0, -6, 6, 0, 0, 6, -6, 0);
-        e.setRadius(6);
+        e.setPolygonCoordinates(0, -12, 12, 0, 0, 12, -12, 0);
+        e.setRadius(12);
 
         Random rnd = new Random();
         int edge = rnd.nextInt(4);
@@ -44,6 +44,7 @@ public class EnemyPlugin implements IGamePluginService {
         }
         e.setRotation(rnd.nextInt(360));
         e.setCollisionGroup("enemy");
+        e.setFillColor("#CE2029");
         return e;
     }
 }

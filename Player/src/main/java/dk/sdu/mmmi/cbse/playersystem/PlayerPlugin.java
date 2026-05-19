@@ -27,6 +27,7 @@ public class PlayerPlugin implements IGamePluginService {
         playerShip.setY(gameData.getDisplayHeight()/2);
         playerShip.setRadius(8);
         playerShip.setCollisionGroup("player");
+        playerShip.setFillColor("royalblue");
         return playerShip;
     }
 

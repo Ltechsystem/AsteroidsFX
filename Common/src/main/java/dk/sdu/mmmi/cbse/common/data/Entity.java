@@ -14,6 +14,7 @@ public class Entity implements Serializable {
     private float radius;
     private double speed;
     private String collisionGroup;
+    private String fillColor;
             
 
     public String getID() {
@@ -77,5 +78,13 @@ public class Entity implements Serializable {
 
     public String getCollisionGroup() {
         return collisionGroup;
+    }
+
+    public void setFillColor(String fillColor) {
+        this.fillColor = fillColor;
+    }
+
+    public String getFillColor() {
+        return fillColor;
     }
 }

@@ -32,8 +32,9 @@ public class BulletControlSystem implements IEntityProcessingService, BulletSPI 
         bullet.setPolygonCoordinates(1, -1, 1, 1, -1, 1, -1, -1);
         double changeX = Math.cos(Math.toRadians(shooter.getRotation()));
         double changeY = Math.sin(Math.toRadians(shooter.getRotation()));
-        bullet.setX(shooter.getX() + changeX * 10);
-        bullet.setY(shooter.getY() + changeY * 10);
+        double spawnOffset = shooter.getRadius() * 2 + 5;
+        bullet.setX(shooter.getX() + changeX * spawnOffset);
+        bullet.setY(shooter.getY() + changeY * spawnOffset);
         bullet.setRotation(shooter.getRotation());
         bullet.setRadius(1);
         return bullet;
