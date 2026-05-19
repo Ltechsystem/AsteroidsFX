@@ -44,6 +44,7 @@ public class EnemyPlugin implements IGamePluginService {
         }
         e.setRotation(rnd.nextInt(360));
         e.setCollisionGroup("enemy");
+        e.addIgnoredCollisionGroup("asteroid");
         e.setFillColor("#CE2029");
         return e;
     }

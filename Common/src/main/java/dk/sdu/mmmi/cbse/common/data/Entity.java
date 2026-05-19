@@ -1,6 +1,8 @@
 package dk.sdu.mmmi.cbse.common.data;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public class Entity implements Serializable {
@@ -14,6 +16,7 @@ public class Entity implements Serializable {
     private float radius;
     private double speed;
     private String collisionGroup;
+    private final Set<String> ignoredCollisionGroups = new HashSet<>();
     private String fillColor;
             
 
@@ -78,6 +81,14 @@ public class Entity implements Serializable {
 
     public String getCollisionGroup() {
         return collisionGroup;
+    }
+
+    public void addIgnoredCollisionGroup(String group) {
+        ignoredCollisionGroups.add(group);
+    }
+
+    public Set<String> getIgnoredCollisionGroups() {
+        return ignoredCollisionGroups;
     }
 
     public void setFillColor(String fillColor) {

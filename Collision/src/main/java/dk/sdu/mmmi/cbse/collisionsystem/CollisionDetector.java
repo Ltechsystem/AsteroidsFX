@@ -26,6 +26,12 @@ public class CollisionDetector implements IPostEntityProcessingService {
                 if (group1 != null && group1.equals(group2)) {
                     continue;
                 }
+                if (group2 != null && entity1.getIgnoredCollisionGroups().contains(group2)) {
+                    continue;
+                }
+                if (group1 != null && entity2.getIgnoredCollisionGroups().contains(group1)) {
+                    continue;
+                }
 
                 if (this.collides(entity1, entity2)) {
                     world.removeEntity(entity1);

@@ -62,6 +62,7 @@ public class EnemyControlSystem implements IEntityProcessingService {
                         bullet.setRadius(3);
                         bullet.setSpeed(bulletSpeed);
                         bullet.setCollisionGroup("enemy-bullet");
+                        bullet.addIgnoredCollisionGroup("asteroid");
                         world.addEntity(bullet);
                         enemy.setRotation(prev);
                     });
