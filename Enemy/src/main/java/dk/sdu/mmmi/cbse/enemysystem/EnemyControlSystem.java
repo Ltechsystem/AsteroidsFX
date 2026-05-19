@@ -20,10 +20,10 @@ public class EnemyControlSystem implements IEntityProcessingService {
     private long lastDirectionChange = 0;
     private long lastShotTime = 0;
 
-    private static final long directionChangeInterval = 2000;
+    private final long directionChangeInterval = new Random().nextInt(1500) + 1500;
     private static final long bulletFireRate = 2000;
     private static final double bulletSpeed = 1.5;
-    private static final double enemySpeed = 0.75;
+    private final double enemySpeed = new Random().nextDouble(0.75) + 0.75;
     private static final double aimVariance = 5;
 
     @Override
