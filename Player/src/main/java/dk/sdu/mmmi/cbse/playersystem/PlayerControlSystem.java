@@ -1,6 +1,5 @@
 package dk.sdu.mmmi.cbse.playersystem;
 
-import dk.sdu.mmmi.cbse.common.bullet.Bullet;
 import dk.sdu.mmmi.cbse.common.bullet.BulletSPI;
 import dk.sdu.mmmi.cbse.common.data.Entity;
 import dk.sdu.mmmi.cbse.common.data.GameData;
@@ -55,8 +54,8 @@ public class PlayerControlSystem implements IEntityProcessingService {
             player.setX(gameData.getDisplayWidth()-1);
         }
 
-        if (player.getY() < 0) {
-            player.setY(1);
+        if (player.getY() < gameData.getDisplayTopBound()) {
+            player.setY(gameData.getDisplayTopBound() + 1);
         }
 
         if (player.getY() > gameData.getDisplayHeight()) {

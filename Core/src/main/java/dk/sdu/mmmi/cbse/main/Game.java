@@ -16,15 +16,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javafx.animation.AnimationTimer;
-import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
  *
@@ -42,9 +41,8 @@ class Game {
     private final List<IWaveSpawnerService> waveSpawnerServices;
     private int currentWave = 0;
     private Text waveText;
-    private Text destroyedText;
-    private int destroyedAsteroids = 0;
-    private long prevAsteroidCount = 0;
+    private Text asteroidsText;
+    private Text enemiesText;
 
     Game(List<IGamePluginService> gamePluginServices, List<IEntityProcessingService> entityProcessingServiceList, List<IPostEntityProcessingService> postEntityProcessingServices, List<IWaveSpawnerService> waveSpawnerServices) {
         this.gamePluginServices = gamePluginServices;
@@ -54,15 +52,25 @@ class Game {
     }
 
     public void start(Stage window) throws Exception {
-        destroyedText = new Text(10, 20, "Destroyed asteroids: 0");
+        asteroidsText = new Text(10, 20, "Asteroids left: 0");
+        asteroidsText.setFill(Color.WHITE);
+        enemiesText = new Text(10, 40, "Enemies left: 0");
+        enemiesText.setFill(Color.WHITE);
         waveText = new Text("Wave: 1");
         waveText.setX(gameData.getDisplayWidth() / 2.0 - 30);
         waveText.setY(20);
+        waveText.setFill(Color.WHITE);
+        Line hudLine = new Line(0, 50, gameData.getDisplayWidth(), 50);
+        hudLine.setStroke(Color.WHITE);
+        hudLine.setStrokeWidth(1);
         gameWindow.setPrefSize(gameData.getDisplayWidth(), gameData.getDisplayHeight());
-        gameWindow.getChildren().add(destroyedText);
+        gameWindow.getChildren().add(asteroidsText);
+        gameWindow.getChildren().add(enemiesText);
         gameWindow.getChildren().add(waveText);
+        gameWindow.getChildren().add(hudLine);
 
         Scene scene = new Scene(gameWindow);
+        scene.setFill(Color.BLACK);
         scene.setOnKeyPressed(event -> {
             if (event.getCode().equals(KeyCode.LEFT) || event.getCode().equals(KeyCode.A)) {
                 gameData.getKeys().setKey(GameKeys.LEFT, true);
@@ -156,14 +164,14 @@ class Game {
     }
 
     private void updateAsteroidCounter() {
-        long current = world.getEntities().stream()
+        long asteroids = world.getEntities().stream()
                 .filter(e -> "asteroid".equals(e.getCollisionGroup()))
                 .count();
-        if (current < prevAsteroidCount) {
-            destroyedAsteroids += (prevAsteroidCount - current);
-            destroyedText.setText("Destroyed asteroids: " + destroyedAsteroids);
-        }
-        prevAsteroidCount = current;
+        long enemies = world.getEntities().stream()
+                .filter(e -> "enemy".equals(e.getCollisionGroup()))
+                .count();
+        asteroidsText.setText("Asteroids left: " + asteroids);
+        enemiesText.setText("Enemies left: " + enemies);
     }
 
     private void startNextWave() {
@@ -185,7 +193,7 @@ class Game {
     private void stylePolygon(Entity entity, Polygon polygon) {
         String fillColor = entity.getFillColor();
         polygon.setFill(fillColor != null ? Color.web(fillColor) : Color.WHITE);
-        polygon.setStroke(Color.BLACK);
+        polygon.setStroke(Color.WHITE);
         polygon.setStrokeWidth(1);
     }
 

@@ -43,8 +43,8 @@ public class EnemyControlSystem implements IEntityProcessingService {
 
             if (enemy.getX() < 0) enemy.setX(gameData.getDisplayWidth());
             if (enemy.getX() > gameData.getDisplayWidth()) enemy.setX(0);
-            if (enemy.getY() < 0) enemy.setY(gameData.getDisplayHeight());
-            if (enemy.getY() > gameData.getDisplayHeight()) enemy.setY(0);
+            if (enemy.getY() < gameData.getDisplayTopBound()) enemy.setY(gameData.getDisplayHeight());
+            if (enemy.getY() > gameData.getDisplayHeight()) enemy.setY(gameData.getDisplayTopBound());
 
             if (now - lastShotTime >= bulletFireRate) {
                 Entity target = findPlayer(enemy, world);
