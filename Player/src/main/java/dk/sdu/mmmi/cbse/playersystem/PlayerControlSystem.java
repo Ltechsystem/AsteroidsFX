@@ -38,9 +38,11 @@ public class PlayerControlSystem implements IEntityProcessingService {
             if (gameData.getKeys().isDown(GameKeys.SPACE)) {
                 long now = System.currentTimeMillis();
                 if (now - lastBulletTime >= bulletFireRate) { // Checks if the last fired bullet is greater than or equal to the fire rate
-                    getBulletSPIs().stream().findFirst().ifPresent(
-                            spi -> world.addEntity(spi.createBullet(player, gameData))
-                    );
+                    getBulletSPIs().stream().findFirst().ifPresent(spi -> {
+                        Entity bullet = spi.createBullet(player, gameData);
+                        bullet.setCollisionGroup("player-bullet");
+                        world.addEntity(bullet);
+                    });
                     lastBulletTime = now;
                 }
             }

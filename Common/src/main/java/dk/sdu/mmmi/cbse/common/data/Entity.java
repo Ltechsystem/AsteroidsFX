@@ -13,6 +13,7 @@ public class Entity implements Serializable {
     private double rotation;
     private float radius;
     private double speed;
+    private String collisionGroup;
             
 
     public String getID() {
@@ -68,5 +69,13 @@ public class Entity implements Serializable {
 
     public double getSpeed() {
         return speed;
+    }
+
+    public void setCollisionGroup(String collisionGroup) {
+        this.collisionGroup = collisionGroup;
+    }
+
+    public String getCollisionGroup() {
+        return collisionGroup;
     }
 }

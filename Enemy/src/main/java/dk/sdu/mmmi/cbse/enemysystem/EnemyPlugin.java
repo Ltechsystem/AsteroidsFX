@@ -43,6 +43,7 @@ public class EnemyPlugin implements IGamePluginService {
             e.setY(rnd.nextInt(gameData.getDisplayHeight()));
         }
         e.setRotation(rnd.nextInt(360));
+        e.setCollisionGroup("enemy");
         return e;
     }
 }

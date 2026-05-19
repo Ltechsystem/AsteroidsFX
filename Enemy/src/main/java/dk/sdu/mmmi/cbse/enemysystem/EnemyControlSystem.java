@@ -59,6 +59,7 @@ public class EnemyControlSystem implements IEntityProcessingService {
                         enemy.setRotation(aimAngle);
                         Entity bullet = spi.createBullet(enemy, gameData);
                         bullet.setSpeed(bulletSpeed);
+                        bullet.setCollisionGroup("enemy-bullet");
                         world.addEntity(bullet);
                         enemy.setRotation(prev);
                     });
