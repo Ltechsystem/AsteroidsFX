@@ -16,15 +16,18 @@ import static java.util.stream.Collectors.toList;
 
 public class PlayerControlSystem implements IEntityProcessingService {
 
+    private long lastBulletTime = 0;
+    private int bulletFireRate = 100; // Bullet fire rate in miliseconds
+
     @Override
     public void process(GameData gameData, World world) {
             
         for (Entity player : world.getEntities(Player.class)) {
             if (gameData.getKeys().isDown(GameKeys.LEFT)) {
-                player.setRotation(player.getRotation() - 5);                
+                player.setRotation(player.getRotation() - 2);
             }
             if (gameData.getKeys().isDown(GameKeys.RIGHT)) {
-                player.setRotation(player.getRotation() + 5);                
+                player.setRotation(player.getRotation() + 2);
             }
             if (gameData.getKeys().isDown(GameKeys.UP)) {
                 double changeX = Math.cos(Math.toRadians(player.getRotation()));
@@ -32,10 +35,14 @@ public class PlayerControlSystem implements IEntityProcessingService {
                 player.setX(player.getX() + changeX);
                 player.setY(player.getY() + changeY);
             }
-            if(gameData.getKeys().isDown(GameKeys.SPACE)) {                
-                getBulletSPIs().stream().findFirst().ifPresent(
-                        spi -> {world.addEntity(spi.createBullet(player, gameData));}
-                );
+            if (gameData.getKeys().isDown(GameKeys.SPACE)) {
+                long now = System.currentTimeMillis();
+                if (now - lastBulletTime >= bulletFireRate) { // Checks if the last fired bullet is greater than or equal to the fire rate
+                    getBulletSPIs().stream().findFirst().ifPresent(
+                            spi -> world.addEntity(spi.createBullet(player, gameData))
+                    );
+                    lastBulletTime = now;
+                }
             }
             
         if (player.getX() < 0) {

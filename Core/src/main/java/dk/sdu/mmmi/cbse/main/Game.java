@@ -51,13 +51,13 @@ class Game {
 
         Scene scene = new Scene(gameWindow);
         scene.setOnKeyPressed(event -> {
-            if (event.getCode().equals(KeyCode.LEFT)) {
+            if (event.getCode().equals(KeyCode.LEFT) || event.getCode().equals(KeyCode.A)) {
                 gameData.getKeys().setKey(GameKeys.LEFT, true);
             }
-            if (event.getCode().equals(KeyCode.RIGHT)) {
+            if (event.getCode().equals(KeyCode.RIGHT) || event.getCode().equals(KeyCode.D)) {
                 gameData.getKeys().setKey(GameKeys.RIGHT, true);
             }
-            if (event.getCode().equals(KeyCode.UP)) {
+            if (event.getCode().equals(KeyCode.UP) || event.getCode().equals(KeyCode.W)) {
                 gameData.getKeys().setKey(GameKeys.UP, true);
             }
             if (event.getCode().equals(KeyCode.SPACE)) {
@@ -65,19 +65,18 @@ class Game {
             }
         });
         scene.setOnKeyReleased(event -> {
-            if (event.getCode().equals(KeyCode.LEFT)) {
+            if (event.getCode().equals(KeyCode.LEFT) || event.getCode().equals(KeyCode.A)) {
                 gameData.getKeys().setKey(GameKeys.LEFT, false);
             }
-            if (event.getCode().equals(KeyCode.RIGHT)) {
+            if (event.getCode().equals(KeyCode.RIGHT) || event.getCode().equals(KeyCode.D)) {
                 gameData.getKeys().setKey(GameKeys.RIGHT, false);
             }
-            if (event.getCode().equals(KeyCode.UP)) {
+            if (event.getCode().equals(KeyCode.UP) || event.getCode().equals(KeyCode.W)) {
                 gameData.getKeys().setKey(GameKeys.UP, false);
             }
             if (event.getCode().equals(KeyCode.SPACE)) {
                 gameData.getKeys().setKey(GameKeys.SPACE, false);
             }
-
         });
 
         // Lookup all Game Plugins using ServiceLoader
@@ -91,6 +90,7 @@ class Game {
         }
         window.setScene(scene);
         window.setTitle("ASTEROIDS");
+        window.setResizable(false);
         window.show();
     }
 
