@@ -11,6 +11,7 @@ import dk.sdu.mmmi.cbse.common.data.World;
 import dk.sdu.mmmi.cbse.common.services.IEntityProcessingService;
 import dk.sdu.mmmi.cbse.common.services.IGamePluginService;
 import dk.sdu.mmmi.cbse.common.services.IPostEntityProcessingService;
+import dk.sdu.mmmi.cbse.common.services.IWaveSpawnerService;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,17 +39,28 @@ class Game {
     private final List<IGamePluginService> gamePluginServices;
     private final List<IEntityProcessingService> entityProcessingServiceList;
     private final List<IPostEntityProcessingService> postEntityProcessingServices;
+    private final List<IWaveSpawnerService> waveSpawnerServices;
+    private int currentWave = 0;
+    private Text waveText;
+    private Text destroyedText;
+    private int destroyedAsteroids = 0;
+    private long prevAsteroidCount = 0;
 
-    Game(List<IGamePluginService> gamePluginServices, List<IEntityProcessingService> entityProcessingServiceList, List<IPostEntityProcessingService> postEntityProcessingServices) {
+    Game(List<IGamePluginService> gamePluginServices, List<IEntityProcessingService> entityProcessingServiceList, List<IPostEntityProcessingService> postEntityProcessingServices, List<IWaveSpawnerService> waveSpawnerServices) {
         this.gamePluginServices = gamePluginServices;
         this.entityProcessingServiceList = entityProcessingServiceList;
         this.postEntityProcessingServices = postEntityProcessingServices;
+        this.waveSpawnerServices = waveSpawnerServices;
     }
 
     public void start(Stage window) throws Exception {
-        Text text = new Text(10, 20, "Destroyed asteroids: 0");
+        destroyedText = new Text(10, 20, "Destroyed asteroids: 0");
+        waveText = new Text("Wave: 1");
+        waveText.setX(gameData.getDisplayWidth() / 2.0 - 30);
+        waveText.setY(20);
         gameWindow.setPrefSize(gameData.getDisplayWidth(), gameData.getDisplayHeight());
-        gameWindow.getChildren().add(text);
+        gameWindow.getChildren().add(destroyedText);
+        gameWindow.getChildren().add(waveText);
 
         Scene scene = new Scene(gameWindow);
         scene.setOnKeyPressed(event -> {
@@ -80,10 +92,10 @@ class Game {
             }
         });
 
-        // Lookup all Game Plugins using ServiceLoader
         for (IGamePluginService iGamePlugin : getGamePluginServices()) {
             iGamePlugin.start(gameData, world);
         }
+        startNextWave();
         for (Entity entity : world.getEntities()) {
             Polygon polygon = new Polygon(entity.getPolygonCoordinates());
             stylePolygon(entity, polygon);
@@ -101,6 +113,8 @@ class Game {
             @Override
             public void handle(long now) {
                 update();
+                checkWaveCompletion();
+                updateAsteroidCounter();
                 draw();
                 gameData.getKeys().update();
             }
@@ -139,6 +153,33 @@ class Game {
             polygon.setRotate(entity.getRotation());
         }
 
+    }
+
+    private void updateAsteroidCounter() {
+        long current = world.getEntities().stream()
+                .filter(e -> "asteroid".equals(e.getCollisionGroup()))
+                .count();
+        if (current < prevAsteroidCount) {
+            destroyedAsteroids += (prevAsteroidCount - current);
+            destroyedText.setText("Destroyed asteroids: " + destroyedAsteroids);
+        }
+        prevAsteroidCount = current;
+    }
+
+    private void startNextWave() {
+        currentWave++;
+        waveText.setText("Wave: " + currentWave);
+        for (IWaveSpawnerService spawner : waveSpawnerServices) {
+            spawner.spawnWave(currentWave, gameData, world);
+        }
+    }
+
+    private void checkWaveCompletion() {
+        boolean waveEntitiesRemain = world.getEntities().stream()
+                .anyMatch(e -> "enemy".equals(e.getCollisionGroup()) || "asteroid".equals(e.getCollisionGroup()));
+        if (!waveEntitiesRemain) {
+            startNextWave();
+        }
     }
 
     private void stylePolygon(Entity entity, Polygon polygon) {

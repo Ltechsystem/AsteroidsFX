@@ -5,25 +5,29 @@ import dk.sdu.mmmi.cbse.common.data.Entity;
 import dk.sdu.mmmi.cbse.common.data.GameData;
 import dk.sdu.mmmi.cbse.common.data.World;
 import dk.sdu.mmmi.cbse.common.services.IGamePluginService;
+import dk.sdu.mmmi.cbse.common.services.IWaveSpawnerService;
+
 import java.util.Random;
 
-/**
- *
- * @author corfixen
- */
-public class AsteroidPlugin implements IGamePluginService {
+public class AsteroidPlugin implements IGamePluginService, IWaveSpawnerService {
 
     @Override
     public void start(GameData gameData, World world) {
-        Entity asteroid = createAsteroid(gameData);
-        world.addEntity(asteroid);
     }
 
     @Override
     public void stop(GameData gameData, World world) {
-        // Remove entities
         for (Entity asteroid : world.getEntities(Asteroid.class)) {
             world.removeEntity(asteroid);
+        }
+    }
+
+    @Override
+    public void spawnWave(int waveNumber, GameData gameData, World world) {
+        Random rnd = new Random();
+        int count = waveNumber + 1 + rnd.nextInt(waveNumber + 1);
+        for (int i = 0; i < count; i++) {
+            world.addEntity(createAsteroid(gameData));
         }
     }
 
@@ -42,7 +46,7 @@ public class AsteroidPlugin implements IGamePluginService {
         asteroid.setX(rnd.nextInt(gameData.getDisplayWidth()));
         asteroid.setY(rnd.nextInt(gameData.getDisplayHeight()));
         asteroid.setRadius(size);
-        asteroid.setRotation(rnd.nextInt(90));
+        asteroid.setRotation(rnd.nextInt(360));
         asteroid.setCollisionGroup("asteroid");
         asteroid.setFillColor("#1C1C1C");
         return asteroid;

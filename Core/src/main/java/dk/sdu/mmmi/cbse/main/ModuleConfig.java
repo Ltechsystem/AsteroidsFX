@@ -3,6 +3,7 @@ package dk.sdu.mmmi.cbse.main;
 import dk.sdu.mmmi.cbse.common.services.IEntityProcessingService;
 import dk.sdu.mmmi.cbse.common.services.IGamePluginService;
 import dk.sdu.mmmi.cbse.common.services.IPostEntityProcessingService;
+import dk.sdu.mmmi.cbse.common.services.IWaveSpawnerService;
 import java.util.List;
 import java.util.ServiceLoader;
 import static java.util.stream.Collectors.toList;
@@ -21,7 +22,12 @@ class ModuleConfig {
 
     @Bean
     public Game game(){
-        return new Game(gamePluginServices(), entityProcessingServiceList(), postEntityProcessingServices());
+        return new Game(gamePluginServices(), entityProcessingServiceList(), postEntityProcessingServices(), waveSpawnerServices());
+    }
+
+    @Bean
+    public List<IWaveSpawnerService> waveSpawnerServices() {
+        return ServiceLoader.load(IWaveSpawnerService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
     }
 
     @Bean

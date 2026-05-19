@@ -4,22 +4,30 @@ import dk.sdu.mmmi.cbse.common.data.Entity;
 import dk.sdu.mmmi.cbse.common.data.GameData;
 import dk.sdu.mmmi.cbse.common.data.World;
 import dk.sdu.mmmi.cbse.common.services.IGamePluginService;
+import dk.sdu.mmmi.cbse.common.services.IWaveSpawnerService;
 
 import java.util.Random;
 
-public class EnemyPlugin implements IGamePluginService {
-
-    private Entity enemy;
+public class EnemyPlugin implements IGamePluginService, IWaveSpawnerService {
 
     @Override
     public void start(GameData gameData, World world) {
-        enemy = createEnemy(gameData);
-        world.addEntity(enemy);
     }
 
     @Override
     public void stop(GameData gameData, World world) {
-        world.removeEntity(enemy);
+        for (Entity e : world.getEntities(Enemy.class)) {
+            world.removeEntity(e);
+        }
+    }
+
+    @Override
+    public void spawnWave(int waveNumber, GameData gameData, World world) {
+        Random rnd = new Random();
+        int count = waveNumber + rnd.nextInt(waveNumber + 1);
+        for (int i = 0; i < count; i++) {
+            world.addEntity(createEnemy(gameData));
+        }
     }
 
     private Entity createEnemy(GameData gameData) {
